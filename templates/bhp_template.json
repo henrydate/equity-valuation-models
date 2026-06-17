@@ -1,0 +1,65 @@
+{
+  "_help": "Replace every null with a primary-source value and every 'FILL ...' citation with the exact reference. Run `python -m src.template_loader templates/bhp_template.json` any time to see what is still missing. See docs/DATA_ENTRY.md.",
+  "_units": "Production in million tonnes (Mt); prices in US$/tonne -> production x price = US$ million. Costs US$/t. Capex, net debt, corporate, other_assets in US$ million. Shares in millions.",
+
+  "company": "BHP Group Limited",
+  "ticker": "BHP.AX",
+  "reporting_currency": "USD",
+  "presentation_currency": "AUD",
+  "valuation_base_year": 2026,
+  "forecast_years": [2027, 2028, 2029, 2030, 2031],
+
+  "wacc": {
+    "risk_free":    {"value": null, "citation": "FILL - 10Y govt yield matching the cash-flow ccy (e.g. US 10Y, FRED, <date>)"},
+    "erp":          {"value": null, "method": "implied", "citation": "FILL - e.g. Damodaran implied ERP <vintage>"},
+    "equity_beta":  {"value": null, "method": "bottom_up", "rationale": "FILL - peer set + unlever/re-lever logic", "citation": "FILL - peers + re-lever gearing"},
+    "cost_of_debt": {"value": null, "method": "rating_implied", "citation": "FILL - rating + spread, or weighted-avg from the debt note"},
+    "tax_rate":     {"value": 0.30, "citation": "FILL - statutory (AUS 30%) or effective; royalties go in royalty_rate, not here"},
+    "mv_equity":    {"value": null, "citation": "FILL - share price x shares outstanding"},
+    "mv_debt":      {"value": null, "citation": "FILL - net debt, FY annual report"},
+    "currency_basis": {"citation": "FILL - why this currency basis"}
+  },
+
+  "commodity_decks": {
+    "iron ore": {"unit": "USD/t", "spot": null, "citation": "FILL - consensus (broker median) + cost-curve support",
+      "deck": {"2027": null, "2028": null, "2029": null, "2030": null, "2031": null, "long_run": null}},
+    "copper":   {"unit": "USD/t", "spot": null, "citation": "FILL",
+      "deck": {"2027": null, "2028": null, "2029": null, "2030": null, "2031": null, "long_run": null}},
+    "met coal": {"unit": "USD/t", "spot": null, "citation": "FILL",
+      "deck": {"2027": null, "2028": null, "2029": null, "2030": null, "2031": null, "long_run": null}},
+    "potash":   {"unit": "USD/t", "spot": null, "citation": "FILL",
+      "deck": {"2027": null, "2028": null, "2029": null, "2030": null, "2031": null, "long_run": null}}
+  },
+
+  "divisions": [
+    {"name": "Iron Ore (WAIO)", "overhead_pv": 0, "assets": [
+      {"name": "WAIO", "commodity": "iron ore", "production": null, "unit_cash_cost": null, "sustaining_capex": null,
+       "royalty_rate": 0.075, "stake": 1.0,
+       "citation": "FILL - production (Mt), C1/AISC cost (US$/t), sustaining capex (US$m) from the FY operational review; verify WA royalty"}
+    ]},
+    {"name": "Copper", "overhead_pv": 0, "assets": [
+      {"name": "Escondida (+ Copper SA)", "commodity": "copper", "production": null, "unit_cash_cost": null, "sustaining_capex": null,
+       "royalty_rate": 0.0, "stake": 0.575,
+       "citation": "FILL - attributable production; verify Escondida stake (57.5%) and any Chilean royalty/mining-tax treatment"}
+    ]},
+    {"name": "Coal (met)", "overhead_pv": 0, "assets": [
+      {"name": "BMA", "commodity": "met coal", "production": null, "unit_cash_cost": null, "sustaining_capex": null,
+       "royalty_rate": 0.10, "stake": 1.0,
+       "citation": "FILL - verify ownership stake and Qld coal royalty (tiered); production + cost from FY review"}
+    ]},
+    {"name": "Potash", "overhead_pv": 0, "assets": [
+      {"name": "Jansen", "commodity": "potash", "production": null, "unit_cash_cost": null, "sustaining_capex": null,
+       "royalty_rate": 0.0, "stake": 1.0,
+       "citation": "FILL - Jansen ramp profile (production likely near zero in early years); use a per-year map if needed"}
+    ]}
+  ],
+
+  "group": {
+    "other_assets": 0,
+    "corporate_pv": null,
+    "net_debt": null,
+    "minorities": null,
+    "shares_outstanding": null,
+    "citation": "FILL - net debt, minority interest, shares outstanding from the FY balance sheet; corporate_pv = PV of unallocated corporate/admin costs"
+  }
+}
