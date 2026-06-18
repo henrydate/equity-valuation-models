@@ -9,7 +9,7 @@ Most valuation repositories are formula libraries. This one adds the layer that 
 ---
 
 > ### Status — June 2026
-> **Stages 1–3 are built and tested** (**53 passing tests**): the assumption ledger, guardrail engine, elicitation wizard, WACC + mining question banks, yfinance scaffold, articulated three-statement model, **sum-of-parts engine**, **research-note generator**, and an **openpyxl Excel model**, a CLI, and a rendered **showcase notebook** (`showcase.ipynb`). An end-to-end **illustrative BHP** SOTP runs offline and emits *both* a markdown research note and a formatted Excel workbook. **Remaining — the real work:** replacing the illustrative inputs with primary-source BHP data and writing the thesis. All demo figures are **illustrative, not a real valuation.**
+> **Stages 1–3 are built and tested** (**56 passing tests**): the assumption ledger, guardrail engine, elicitation wizard, WACC + mining question banks, yfinance scaffold, articulated three-statement model, **sum-of-parts engine**, **research-note generator**, and an **openpyxl Excel model**, a CLI, and a rendered **showcase notebook** (`showcase.ipynb`). An end-to-end **illustrative BHP** SOTP runs offline and emits *both* a markdown research note and a formatted Excel workbook. **Remaining — the real work:** replacing the illustrative inputs with primary-source BHP data and writing the thesis. All demo figures are **illustrative, not a real valuation.**
 
 ---
 
@@ -26,7 +26,7 @@ Most valuation repositories are formula libraries. This one adds the layer that 
 ```bash
 pip install -r requirements.txt
 
-python -m pytest tests/ -q             # 53 passing
+python -m pytest tests/ -q             # 56 passing
 python value.py BHP.AX --demo          # WACC spine, offline
 python examples/bhp_sotp_demo.py       # illustrative BHP SOTP -> note (.md) + model (.xlsx)
 jupyter notebook showcase.ipynb        # the whole pipeline, rendered end-to-end
@@ -90,7 +90,7 @@ equity-valuation-models/
 │   ├── sector_models.py          # mining/NAV, SaaS, REIT, banking models
 │   ├── three_statement.py        # articulated 3-statement model that foots + integrity validator
 │   └── financial_statements.py   # P&L builder + provenance types (Assumption, SourceOfTruth)
-├── tests/                        # 53 tests: ledger, guardrails, wizard, scaffold, 3-statement, sotp, note, mining, excel, template
+├── tests/                        # 56 tests: ledger, guardrails, wizard, scaffold, 3-statement, sotp, note, mining, excel, template
 ├── examples/
 │   ├── bhp_sotp_demo.py          # end-to-end illustrative BHP SOTP -> note + Excel
 │   └── mining_nav_example.py     # synthetic NAV mechanics demo (not a real company)

@@ -27,6 +27,9 @@ DEMO_INFO = {
     "currentPrice": 41.20, "sharesOutstanding": 5_068_000_000,
     "marketCap": 208_000_000_000, "beta": 0.61,
 }
+# The demo scaffold is a frozen, illustrative AUD-listing snapshot -- NOT a live
+# pull. Stamp it with a fixed as-of so the note never implies it is today's price.
+DEMO_AS_OF = "2026-06-15"
 DEMO_ANSWERS = {
     "wacc.currency_basis": {"value": "USD", "citation": "BHP functional currency",
                             "rationale": "commodities USD-priced; convert final $/share to AUD at spot"},
@@ -41,8 +44,8 @@ DEMO_ANSWERS = {
                           "citation": "A-rated; rf + ~1.1% spread", "rationale": "rating-implied"},
     "wacc.tax_rate": {"value": 0.30, "citation": "AUS statutory rate",
                       "rationale": "statutory; royalties captured in opex, not in the tax rate"},
-    "wacc.mv_equity": {"value": 208000, "citation": "share price x shares (scaffold cross-check)"},
-    "wacc.mv_debt": {"value": 10000, "citation": "BHP FY25 net debt"},
+    "wacc.mv_equity": {"value": 208000, "citation": "approx AUD price x shares, ~208,800m (illustrative; AUD basis)"},
+    "wacc.mv_debt": {"value": 10000, "citation": "BHP FY25 net debt (illustrative; USD ~10,000m)"},
 }
 
 
@@ -55,14 +58,16 @@ def _context_for(key: str, ledger: Ledger) -> dict:
     return {}
 
 
-def _load_scaffold(ledger: Ledger, info: dict, ticker: str) -> None:
-    for entry in scaffold_entries(info, ticker, price_currency=ledger.presentation_currency).values():
+def _load_scaffold(ledger: Ledger, info: dict, ticker: str,
+                   as_of=None, live: bool = True) -> None:
+    for entry in scaffold_entries(info, ticker, as_of=as_of,
+                                  price_currency=ledger.presentation_currency, live=live).values():
         ledger.add(entry)
 
 
 def run_demo(ticker: str, company: str, out_path: str) -> None:
     led = Ledger(company=company, ticker=ticker)
-    _load_scaffold(led, DEMO_INFO, ticker)
+    _load_scaffold(led, DEMO_INFO, ticker, as_of=DEMO_AS_OF, live=False)
     for spec in WACC_BANK:
         entry, _ = build_entry(spec, DEMO_ANSWERS[spec["key"]], context=_context_for(spec["key"], led))
         led.add(entry)

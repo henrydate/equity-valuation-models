@@ -29,7 +29,7 @@ from .financial_statements import SourceOfTruth
 _MARKET_FIELDS: List[Tuple[str, str, str, str, bool]] = [
     ("group.share_price", "Share price (last close)", "__px__", "currentPrice", False),
     ("group.shares_outstanding", "Shares outstanding", "m shares", "sharesOutstanding", True),
-    ("group.market_cap", "Market capitalisation", "m", "marketCap", True),
+    ("group.market_cap", "Market capitalisation", "__cur_m__", "marketCap", True),
     ("wacc.equity_beta_raw", "Raw equity beta (yfinance)", "x", "beta", False),
 ]
 
@@ -41,10 +41,14 @@ def fetch_info(ticker: str) -> dict:
 
 
 def scaffold_entries(info: dict, ticker: str, as_of: Optional[str] = None,
-                     price_currency: str = "AUD") -> Dict[str, LedgerEntry]:
+                     price_currency: str = "AUD", live: bool = True) -> Dict[str, LedgerEntry]:
     """Build UNVERIFIED scaffold ledger entries from a yfinance-style info dict.
 
     Pure function: pass any dict (real yfinance ``info`` or a test fixture).
+    ``live=False`` marks the entries as an illustrative placeholder rather than a
+    real pull, so an offline demo never presents a frozen number as live data.
+    Market-cap units carry the price currency (e.g. ``"AUD m"``) so the AUD
+    listing is never silently mixed with the USD valuation basis.
     """
     as_of = as_of or date.today().isoformat()
     out: Dict[str, LedgerEntry] = {}
@@ -55,17 +59,25 @@ def scaffold_entries(info: dict, ticker: str, as_of: Optional[str] = None,
         value = raw
         if to_millions and isinstance(raw, (int, float)):
             value = round(raw / 1_000_000, 2)
+        if unit == "__px__":
+            resolved_unit = price_currency
+        elif unit == "__cur_m__":
+            resolved_unit = f"{price_currency} m"
+        else:
+            resolved_unit = unit
+        citation = (f"yfinance {ticker} (field: {field_name})" if live
+                    else f"ILLUSTRATIVE placeholder -- {ticker} {field_name}; not a live pull")
         out[key] = LedgerEntry(
             key=key,
             label=label,
             value=value,
-            unit=price_currency if unit == "__px__" else unit,
+            unit=resolved_unit,
             kind=InputKind.HARD_FACT,
             source_type=SourceOfTruth.EXTERNAL_DATA,
-            citation=f"yfinance {ticker} (field: {field_name})",
+            citation=citation,
             as_of=as_of,
             verification=VerificationStatus.UNVERIFIED,
-            provenance_method="auto_pull",
+            provenance_method="auto_pull" if live else "manual",
             entered_by="system",
             scaffold_value=value,
         )

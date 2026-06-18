@@ -46,7 +46,8 @@ SPOTS = {"ironore.price_deck": 105, "copper.price_deck": 9600, "metcoal.price_de
 
 def build_ledger():
     led = Ledger("BHP Group Limited  (ILLUSTRATIVE)", "BHP.AX")
-    for entry in scaffold_entries(wacc_demo.DEMO_INFO, "BHP.AX", price_currency="AUD").values():
+    for entry in scaffold_entries(wacc_demo.DEMO_INFO, "BHP.AX", as_of=wacc_demo.DEMO_AS_OF,
+                                  price_currency="AUD", live=False).values():
         led.add(entry)
     for spec in WACC_BANK:
         entry, _ = build_entry(spec, wacc_demo.DEMO_ANSWERS[spec["key"]],

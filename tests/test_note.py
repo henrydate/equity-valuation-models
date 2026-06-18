@@ -51,3 +51,11 @@ def test_write_note(tmp_path):
     text = write_note(p, build_ledger(), make_sotp(), recommendation="HOLD")
     assert p.read_text(encoding="utf-8").startswith("# BHP Group Limited")
     assert "HOLD" in text
+
+
+def test_note_surfaces_as_of_dates_and_market_data():
+    note = render_note(build_ledger(), make_sotp(), recommendation="HOLD")
+    assert "As of" in note                 # every assumption is dated in the table
+    assert "2026-06-15" in note            # the as-of date is actually rendered
+    assert "Market data (as-of)" in note   # scaffolded hard facts get their own dated table
+    assert "yfinance" in note              # the citation string is shown, for verification

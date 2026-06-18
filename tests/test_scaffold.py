@@ -38,3 +38,17 @@ def test_scaffold_entries_are_valid_without_rationale():
 def test_scaffold_skips_missing_fields():
     ents = scaffold_entries({"currentPrice": 41.2}, "BHP.AX")
     assert set(ents.keys()) == {"group.share_price"}
+
+
+def test_scaffold_market_cap_carries_currency():
+    # market cap must not be a bare "m" -- it carries the listing currency
+    ents = scaffold_entries(FAKE_INFO, "BHP.AX", price_currency="AUD")
+    assert ents["group.market_cap"].unit == "AUD m"
+
+
+def test_scaffold_live_false_marks_illustrative():
+    # an offline/demo scaffold must never masquerade as a live pull
+    ents = scaffold_entries(FAKE_INFO, "BHP.AX", as_of="2026-06-15", live=False)
+    cite = ents["group.share_price"].citation
+    assert "ILLUSTRATIVE" in cite
+    assert "yfinance" not in cite

@@ -60,7 +60,9 @@ def render_note(ledger: Ledger, sotp=None, *, thesis: Optional[str] = None,
         target = sotp.value_per_share()
     elif "value_per_share" in ledger.results:
         target = ledger.results["value_per_share"].get("value")
-    current = ledger.value_of("group.share_price")
+    price_entry = ledger.get("group.share_price")
+    current = price_entry.value if price_entry else None
+    px_asof = f" (as of {price_entry.as_of})" if price_entry else ""
 
     L.append("## Recommendation")
     L.append("")
@@ -72,13 +74,13 @@ def render_note(ledger: Ledger, sotp=None, *, thesis: Optional[str] = None,
     if target is not None and current:
         if same_ccy:
             upside = target / current - 1
-            L.append(f"- **Last price:** {current:,.2f} {ledger.presentation_currency}"
+            L.append(f"- **Last price:** {current:,.2f} {ledger.presentation_currency}{px_asof}"
                      f"  →  **implied upside {upside:+.0%}**")
         else:
             # Comparing a target in the reporting currency to a price in the listing
             # currency is apples-to-oranges; show both and flag the missing FX step
             # rather than print a misleading percentage.
-            L.append(f"- **Last price:** {current:,.2f} {ledger.presentation_currency}  ·  "
+            L.append(f"- **Last price:** {current:,.2f} {ledger.presentation_currency}{px_asof}  ·  "
                      f"target {target:,.2f} {ledger.reporting_currency} — "
                      f"_FX conversion required before comparing (not applied)_")
     L.append("")
@@ -111,6 +113,19 @@ def render_note(ledger: Ledger, sotp=None, *, thesis: Optional[str] = None,
         L.append(_md_table([f"Component ({ledger.reporting_currency}m)", "Value", "% of EV"], rows))
         L.append("")
 
+    # --- Market data (scaffold, dated & cited so it is verifiable) ------
+    facts = [e for e in ledger.entries.values() if e.kind == InputKind.HARD_FACT]
+    if facts:
+        L.append("## Market data (as-of)")
+        L.append("")
+        rows = []
+        for e in facts:
+            verified = "✓" if e.verification == VerificationStatus.VERIFIED else "—"
+            rows.append([e.label, _fmt(e.value), e.unit, e.as_of,
+                         f"{_source_label(e)} — {e.citation}".replace("|", "/"), verified])
+        L.append(_md_table(["Market input", "Value", "Unit", "As of", "Source & citation", "Verified"], rows))
+        L.append("")
+
     # --- Key assumptions & provenance (the ledger, rendered) ------------
     L.append("## Key assumptions & provenance")
     L.append("")
@@ -120,9 +135,11 @@ def render_note(ledger: Ledger, sotp=None, *, thesis: Optional[str] = None,
         for e in disc:
             verified = "✓" if e.verification == VerificationStatus.VERIFIED else "—"
             method = f" ({e.method})" if e.method else ""
-            rows.append([e.label + method, _fmt(e.value), e.unit,
-                         _source_label(e), verified, (e.rationale or "").replace("|", "/")])
-        L.append(_md_table(["Input", "Value", "Unit", "Source", "Verified", "Rationale"], rows))
+            src = f"{_source_label(e)} — {e.citation}".replace("|", "/")
+            rows.append([e.label + method, _fmt(e.value), e.unit, e.as_of, src,
+                         verified, (e.rationale or "").replace("|", "/")])
+        L.append(_md_table(["Input", "Value", "Unit", "As of", "Source & citation",
+                            "Verified", "Rationale"], rows))
     else:
         L.append("_No discretionary inputs recorded._")
     L.append("")
