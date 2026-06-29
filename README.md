@@ -51,6 +51,53 @@ ledger saved -> models/BHP_AX.json
 
 For a real session, `python value.py BHP.AX` pulls the live market scaffold from yfinance and walks you through the WACC bank interactively.
 
+## Worked example — the full pipeline
+
+Running `python examples/bhp_sotp_demo.py` (illustrative BHP data, fully offline) produces:
+
+```
+WACC: 8.53%
+Enterprise value: US$54,298m
+Equity value:     US$40,298m
+Per share (model US$): 7.95
+```
+
+### The ledger: every assumption dated, sourced, and credibility-tracked
+
+| Input | Value | Unit | As of | Source & citation | Verified |
+|-------|-------|------|-------|-------------------|----------|
+| WACC currency basis | USD | ccy | 2026-06-29 | Assumption — BHP functional currency | ✓ |
+| Risk-free rate | 0.042 | % | 2026-06-29 | External Data — US 10Y Treasury, FRED 2026-06-15 | ✓ |
+| Equity risk premium (implied) | 0.048 | % | 2026-06-29 | Analyst Estimate — Damodaran implied ERP, Jun-2026 | ✓ |
+| Equity beta (bottom_up) | 0.95 | x | 2026-06-29 | Analyst Estimate — peers RIO/VALE/Anglo unlevered, re-levered to 15% target gearing | ✓ |
+| Pre-tax cost of debt (rating_implied) | 0.053 | % | 2026-06-29 | Company Filing — A-rated; rf + ~1.1% spread | ✓ |
+| Tax rate (for the discount) | 0.3 | % | 2026-06-29 | External Data — AUS statutory rate | ✓ |
+
+*(Full table: 16 entries, 12 verified, 4 unverified; 0 guardrail warnings; 0 overrides)*
+
+### The sum-of-parts bridge to equity value
+
+| Component | Value | % of EV |
+|-----------|-------|---------|
+| Iron Ore (WAIO) | 43,721m | 81% |
+| Copper | 11,240m | 21% |
+| Coal (met) | 4,208m | 8% |
+| Potash | 1,130m | 2% |
+| Other assets | 2,000m | 4% |
+| Less: Corporate (PV) | (8,000m) | -15% |
+| **Enterprise value** | **54,298m** | **100%** |
+| Less: Net debt | (11,000m) | |
+| Less: Minorities | (3,000m) | |
+| **Equity value** | **40,298m** | |
+| Shares | 5,068m | |
+| **Value per share** | **7.95 USD** | |
+
+### The research note
+
+Each assumption carries its **rationale** and **source**, the ledger is rendered as an audit trail, and the note flags unresolved warnings and logged overrides. All currencies, dates, and methods are visible. The full note (markdown) + a formatted Excel workbook are written to `output/`.
+
+**This is what defensible equity research looks like:** every number dated and sourced, every discretionary choice logged with its reasoning, and guardrails warning when assumptions drift outside sanity bands. An interviewer can read the note and ask "how did you arrive at this beta?" and you have a cited rationale, not a guess.
+
 ## How it works
 
 ```
