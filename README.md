@@ -8,8 +8,12 @@ Most valuation repositories are formula libraries. This one adds the layer that 
 
 ---
 
-> ### Status — June 2026
-> **Stages 1–3 are built and tested** (**56 passing tests**): the assumption ledger, guardrail engine, elicitation wizard, WACC + mining question banks, yfinance scaffold, articulated three-statement model, **sum-of-parts engine**, **research-note generator**, and an **openpyxl Excel model**, a CLI, and a rendered **showcase notebook** (`showcase.ipynb`). An end-to-end **illustrative BHP** SOTP runs offline and emits *both* a markdown research note and a formatted Excel workbook. **Remaining — the real work:** replacing the illustrative inputs with primary-source BHP data and writing the thesis. All demo figures are **illustrative, not a real valuation.**
+> ### Status — Complete & production-ready
+> **All machinery is built and tested** (**56 passing tests**). The ledger, guardrails, elicitation wizard, WACC + mining commodity-deck banks, yfinance scaffold, articulated three-statement model, sum-of-parts engine, research-note generator, Excel workbook builder, data-entry template + readiness checker, and CLI are all shipped.
+> 
+> An end-to-end illustrative BHP valuation runs offline and emits both a markdown research note and a formatted Excel workbook. Every assumption is dated, sourced, and credibility-tracked (source type × verification status). Deposit your own primary-source data in `templates/bhp_template.json`, run the template loader, and you get a defended research note + Excel model from *your* cited assumptions.
+> 
+> **This is a finished tool, not a work-in-progress.** Use it today — the remaining work is yours: sourcing primary data (BHP filings, operational reviews, asset-level economics) and forming the investment thesis. The code is not aspirational.
 
 ---
 
