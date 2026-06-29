@@ -22,6 +22,9 @@ ENV/
 output/
 models/
 
+# Source documents (large, copyrighted -- download annual reports locally into data/)
+data/
+
 # OS / editor
 .DS_Store
 Thumbs.db

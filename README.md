@@ -9,7 +9,7 @@ Most valuation repositories are formula libraries. This one adds the layer that 
 ---
 
 > ### Status — Complete & production-ready
-> **All machinery is built and tested** (**56 passing tests**). The ledger, guardrails, elicitation wizard, WACC + mining commodity-deck banks, yfinance scaffold, articulated three-statement model, sum-of-parts engine, research-note generator, Excel workbook builder, data-entry template + readiness checker, and CLI are all shipped.
+> **All machinery is built and tested** (**62 passing tests**), and ships with a **real, primary-source BHP valuation** — not just a demo. The ledger, guardrails, elicitation wizard, WACC + mining commodity-deck banks, EV/EBITDA + normalized-DCF comparables engine, yfinance scaffold, articulated three-statement model, sum-of-parts engine, research-note generator, Excel workbook builder, data-entry template + readiness checker, and CLI are all shipped.
 > 
 > An end-to-end illustrative BHP valuation runs offline and emits both a markdown research note and a formatted Excel workbook. Every assumption is dated, sourced, and credibility-tracked (source type × verification status). Deposit your own primary-source data in `templates/bhp_template.json`, run the template loader, and you get a defended research note + Excel model from *your* cited assumptions.
 > 
@@ -30,9 +30,10 @@ Most valuation repositories are formula libraries. This one adds the layer that 
 ```bash
 pip install -r requirements.txt
 
-python -m pytest tests/ -q             # 56 passing
+python -m pytest tests/ -q             # 62 passing
+python examples/bhp_sotp_real.py       # REAL BHP valuation: FY25 filing + live data -> note
 python value.py BHP.AX --demo          # WACC spine, offline
-python examples/bhp_sotp_demo.py       # illustrative BHP SOTP -> note (.md) + model (.xlsx)
+python examples/bhp_sotp_demo.py       # illustrative SOTP -> note (.md) + model (.xlsx)
 jupyter notebook showcase.ipynb        # the whole pipeline, rendered end-to-end
 ```
 
@@ -51,52 +52,54 @@ ledger saved -> models/BHP_AX.json
 
 For a real session, `python value.py BHP.AX` pulls the live market scaffold from yfinance and walks you through the WACC bank interactively.
 
-## Worked example — the full pipeline
+## Worked example — a real BHP valuation
 
-Running `python examples/bhp_sotp_demo.py` (illustrative BHP data, fully offline) produces:
+`python examples/bhp_sotp_real.py` values BHP from **primary-source FY2025 data** (the results PDF, segment table p.21) plus **live** market data, and triangulates two independent methods:
 
 ```
-WACC: 8.53%
-Enterprise value: US$54,298m
-Equity value:     US$40,298m
-Per share (model US$): 7.95
+BHP Group Limited (BHP.AX) — REAL valuation (FY25 sourced)
+Live price: A$59.82   shares: 5,081m   beta: 0.825   FX(USD/AUD): 0.69
+Cost of equity: 8.16%   WACC: 7.90%
+EV/EBITDA SOTP    -> A$49.08/share
+Normalized DCF    -> A$58.35/share
+Blended fair value-> A$53.71/share   vs market A$59.82  =>  -10%   (HOLD)
 ```
 
-### The ledger: every assumption dated, sourced, and credibility-tracked
+The two methods bracket fair value; the market sits ~10% above, consistent with it pricing the copper growth pipeline and the Jansen potash ramp that *trailing* FY25 earnings don't yet capture.
 
-| Input | Value | Unit | As of | Source & citation | Verified |
-|-------|-------|------|-------|-------------------|----------|
-| WACC currency basis | USD | ccy | 2026-06-29 | Assumption — BHP functional currency | ✓ |
-| Risk-free rate | 0.042 | % | 2026-06-29 | External Data — US 10Y Treasury, FRED 2026-06-15 | ✓ |
-| Equity risk premium (implied) | 0.048 | % | 2026-06-29 | Analyst Estimate — Damodaran implied ERP, Jun-2026 | ✓ |
-| Equity beta (bottom_up) | 0.95 | x | 2026-06-29 | Analyst Estimate — peers RIO/VALE/Anglo unlevered, re-levered to 15% target gearing | ✓ |
-| Pre-tax cost of debt (rating_implied) | 0.053 | % | 2026-06-29 | Company Filing — A-rated; rf + ~1.1% spread | ✓ |
-| Tax rate (for the discount) | 0.3 | % | 2026-06-29 | External Data — AUS statutory rate | ✓ |
+### The ledger: every figure dated, sourced, verifiable
 
-*(Full table: 16 entries, 12 verified, 4 unverified; 0 guardrail warnings; 0 overrides)*
+| Input | Value | Unit | As of | Source & citation |
+|---|---|---|---|---|
+| Iron Ore underlying EBITDA | 14,396 | US$m | 2025-06-30 | AR25 p.21 |
+| Copper underlying EBITDA | 12,701 | US$m | 2025-06-30 | AR25 p.21 |
+| Net debt | 12,924 | US$m | 2025-06-30 | AR25 Note 21 |
+| Non-controlling interests | 4,553 | US$m | 2025-06-30 | AR25 Note 18 |
+| Equity beta | 0.825 | x | live | yfinance 5y (BHP.AX) |
+| Copper EV/EBITDA multiple | 8.0 | x | 2026 | analyst — copper growth premium |
 
-### The sum-of-parts bridge to equity value
+*Hard facts from the filing are verified; the multiples, WACC and perpetuity growth are the flagged **discretionary** calls, each with a written rationale. Full provenance in the generated `output/BHP_real_note.md`.*
+
+### The sum-of-parts bridge (A$m)
 
 | Component | Value | % of EV |
-|-----------|-------|---------|
-| Iron Ore (WAIO) | 43,721m | 81% |
-| Copper | 11,240m | 21% |
-| Coal (met) | 4,208m | 8% |
-| Potash | 1,130m | 2% |
-| Other assets | 2,000m | 4% |
-| Less: Corporate (PV) | (8,000m) | -15% |
-| **Enterprise value** | **54,298m** | **100%** |
-| Less: Net debt | (11,000m) | |
-| Less: Minorities | (3,000m) | |
-| **Equity value** | **40,298m** | |
-| Shares | 5,068m | |
-| **Value per share** | **7.95 USD** | |
+|---|---|---|
+| Iron Ore | 114,745 | 42% |
+| Copper | 147,250 | 54% |
+| Coal | 4,179 | 2% |
+| Potash / Jansen (invested capital) | 12,353 | 4% |
+| Less: corporate (capitalised) | (3,861) | -1% |
+| **Enterprise value** | **274,667** | **100%** |
+| Less: net debt | (18,729) | |
+| Less: non-controlling interests | (6,598) | |
+| **Equity value** | **249,339** | |
+| **Value per share** | **A$49.08** | |
 
-### The research note
+**Data sources:** market — yfinance (BHP.AX, AUDUSD=X), live; fundamentals — BHP *Financial results for the year ended 30 June 2025* (19 Aug 2025): segment EBITDA & capital employed p.21, net debt Note 21, NCI Note 18, D&A Notes 11–12.
 
-Each assumption carries its **rationale** and **source**, the ledger is rendered as an audit trail, and the note flags unresolved warnings and logged overrides. All currencies, dates, and methods are visible. The full note (markdown) + a formatted Excel workbook are written to `output/`.
+**This is what defensible equity research looks like:** every number dated and sourced, every discretionary call logged with its reasoning. An interviewer asks *"where's the copper EBITDA from?"* → `AR25 p.21`; *"why an 8× multiple?"* → a written, peer-benchmarked rationale, not a guess.
 
-**This is what defensible equity research looks like:** every number dated and sourced, every discretionary choice logged with its reasoning, and guardrails warning when assumptions drift outside sanity bands. An interviewer can read the note and ask "how did you arrive at this beta?" and you have a cited rationale, not a guess.
+> An **illustrative**, fully-offline variant (`python examples/bhp_sotp_demo.py`) exercises the same machinery with placeholder data and a bottom-up production DCF — handy for a quick end-to-end run with no report or network.
 
 ## How it works
 
@@ -134,6 +137,7 @@ equity-valuation-models/
 │   ├── question_banks.py         # WACC + mining commodity-deck banks
 │   ├── data_scaffold.py          # yfinance market-data scaffold (unverified)
 │   ├── sotp.py                   # sum-of-parts valuation (asset -> division -> group)
+│   ├── comps.py                  # EV/EBITDA SOTP + normalized-FCF DCF cross-check
 │   ├── note.py                   # markdown research-note generator (ledger as appendix)
 │   ├── excel_model.py            # openpyxl workbook (cover, valuation, WACC, assumptions, sensitivity)
 │   ├── template_loader.py        # read a filled JSON template -> ledger + note + Excel
@@ -141,8 +145,9 @@ equity-valuation-models/
 │   ├── sector_models.py          # mining/NAV, SaaS, REIT, banking models
 │   ├── three_statement.py        # articulated 3-statement model that foots + integrity validator
 │   └── financial_statements.py   # P&L builder + provenance types (Assumption, SourceOfTruth)
-├── tests/                        # 56 tests: ledger, guardrails, wizard, scaffold, 3-statement, sotp, note, mining, excel, template
+├── tests/                        # 62 tests: ledger, guardrails, wizard, scaffold, 3-statement, sotp, comps, note, mining, excel, template
 ├── examples/
+│   ├── bhp_sotp_real.py          # REAL BHP valuation from FY25 filing + live market data
 │   ├── bhp_sotp_demo.py          # end-to-end illustrative BHP SOTP -> note + Excel
 │   └── mining_nav_example.py     # synthetic NAV mechanics demo (not a real company)
 ├── models/                       # generated ledgers (e.g. BHP_AX.json, BHP_sotp.json)
