@@ -80,6 +80,8 @@ The two methods bracket fair value; the market sits ~10% above, consistent with 
 
 *Hard facts from the filing are verified; the multiples, WACC and perpetuity growth are the flagged **discretionary** calls, each with a written rationale. Full provenance in the generated `output/BHP_real_note.md`.*
 
+> **How citations catch errors:** During construction of this model the initial copper EBITDA entry used the Escondida sub-row (US$8,593m) rather than `Total Copper from Group production` (US$12,701m) on AR25 p.21 — a 48% understatement. The ledger's page-citation requirement forced re-verification of the exact reference, which surfaced the misread immediately. Corrected impact: SOTP ~A$40 → A$49/share (A$9 swing), blended ~A$42 → A$54 (A$12 swing). This is by design: writing `AR25 p.21, Total Copper row` is an error-detection mechanism, not overhead. See [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) for the full walkthrough, [`data/ledger/bhp_sources.csv`](data/ledger/bhp_sources.csv) for the citation trail.
+
 ### The sum-of-parts bridge (A$m)
 
 | Component | Value | % of EV |
@@ -141,6 +143,7 @@ equity-valuation-models/
 │   ├── note.py                   # markdown research-note generator (ledger as appendix)
 │   ├── excel_model.py            # openpyxl workbook (cover, valuation, WACC, assumptions, sensitivity)
 │   ├── template_loader.py        # read a filled JSON template -> ledger + note + Excel
+│   ├── validate_citations.py     # checks ledger citations resolve in the source PDF
 │   ├── valuation.py              # WACC, DCF, comparables, precedent transactions
 │   ├── sector_models.py          # mining/NAV, SaaS, REIT, banking models
 │   ├── three_statement.py        # articulated 3-statement model that foots + integrity validator
@@ -150,6 +153,9 @@ equity-valuation-models/
 │   ├── bhp_sotp_real.py          # REAL BHP valuation from FY25 filing + live market data
 │   ├── bhp_sotp_demo.py          # end-to-end illustrative BHP SOTP -> note + Excel
 │   └── mining_nav_example.py     # synthetic NAV mechanics demo (not a real company)
+├── data/
+│   ├── ledger/bhp_sources.csv    # every extracted fact with page citation + exact reference
+│   └── processed/VERSIONING.md   # FY25 vs HY26 input comparison + staleness guide
 ├── models/                       # generated ledgers (e.g. BHP_AX.json, BHP_sotp.json)
 ├── output/                       # generated note + workbook (BHP_research_note.md, BHP_model.xlsx)
 ├── templates/                    # bhp_template.json — fill-in data-entry skeleton

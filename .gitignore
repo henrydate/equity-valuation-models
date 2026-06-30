@@ -22,8 +22,10 @@ ENV/
 output/
 models/
 
-# Source documents (large, copyrighted -- download annual reports locally into data/)
-data/
+# Source documents: raw PDFs are large and copyrighted -- download locally into data/raw/
+# The extracted + versioned inputs in data/processed/ and data/ledger/ ARE committed.
+data/raw/
+data/*.pdf
 
 # OS / editor
 .DS_Store

@@ -91,6 +91,79 @@ If DCF says $11 but comps say $8 and M&A precedents say $10, something in your a
 
 ---
 
+## Validation & Data Quality
+
+### How the copper EBITDA error was caught
+
+Building the BHP real valuation from the FY25 annual report exposed a common
+analyst failure mode: **segment line vs. total line confusion**.
+
+**The initial misread:**
+The AR25 p.21 segment table lists copper contributors as sub-rows under a
+"Copper" heading. The first sub-row is Escondida (BHP's largest copper asset) at
+US$8,593m. This was pulled as the segment total.
+
+**The actual number (AR25 p.21 — Total Copper from Group production):**
+
+| Sub-segment | EBITDA US$m |
+|---|---|
+| Escondida | 8,593 |
+| Pampa Norte | 1,270 |
+| Copper South Australia | 1,936 |
+| Antamina | 1,002 |
+| Other | (100) |
+| **Total Copper from Group production** | **12,701** |
+
+**Quantified impact of the misread:**
+
+Using 8,593 instead of 12,701 understates copper EBITDA by 48%. At the 8.0×
+peer EV/EBITDA multiple, the error flows directly into valuation:
+
+- SOTP: copper EV understated by US$32,864m → SOTP per share falls by ~A$9/share
+  (correct A$49 vs misstated ~A$40)
+- DCF: group EBITDA understated → normalized FCF falls → DCF per share falls by
+  ~A$14/share (correct A$58 vs misstated ~A$44)
+- Blended: correct A$54 vs misstated ~A$42 — a ~A$12/share swing
+
+This is a material error on a reportable valuation.
+
+**How the citation requirement caught it:**
+
+Every hard fact in the ledger requires a page citation before it can be recorded
+as VERIFIED. The entry for copper EBITDA requires:
+
+```
+Fact     | Copper underlying EBITDA
+Value    | 8,593   ← initial entry
+Source   | AR25
+Page     | 21
+Note     | Segment performance table
+```
+
+Returning to AR25 p.21 to fill in the *exact reference* field made the error
+visible: the filled-in line was the Escondida sub-row, not the "Total Copper from
+Group production" row three lines below. The value was updated to 12,701 and the
+exact reference updated to `"Total Copper from Group production row — NOT the
+Escondida sub-line (8593)"` — which now serves as a permanent warning in the
+citation ledger.
+
+**The lesson:**
+
+Citations are not documentation overhead. The act of writing down a page number
+and exact reference forces re-verification. Silent errors — **right document, wrong
+line** — are exactly what a citation requirement catches, because you have to name
+the line, not just the page. The data quality benefit is the point.
+
+This design is reflected throughout the repo:
+- `data/ledger/bhp_sources.csv` carries every hard fact with page, note, and
+  exact reference fields
+- `src/validate_citations.py` checks that each cited value actually appears on
+  the cited page in the source PDF
+- The ledger's `HARD_FACT` tier enforces that `citation` and `as_of` are present
+  before a fact is accepted as VERIFIED
+
+---
+
 ## The Valuation Workflow
 
 ### Step 1: Define the Revenue Model
