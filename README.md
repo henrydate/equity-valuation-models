@@ -49,6 +49,8 @@ Blended fair value-> A$53.71/share   vs market A$59.82  =>  -10%   (HOLD)
 
 The two methods give different answers (A$49 vs A$58). The blended result sits about 10% below the market price, which is consistent with the market pricing in the value of BHP's copper growth pipeline and the Jansen potash mine. Both are still under development and do not yet show up in trailing earnings.
 
+Both generated outputs are committed, so the result can be read without installing or running anything: the **[research note](output/BHP_real_note.md)** (thesis, valuation bridge, full assumption provenance) and the **[Excel model](output/BHP_real_model.xlsx)** (cover, valuation, WACC build, assumptions ledger, sensitivity grid with scenario chart).
+
 ### Every figure is dated and sourced
 
 Below is a sample from the assumption ledger. Hard facts from the filing are marked verified; the EV/EBITDA multiples and discount rates are flagged as analyst judgement calls, each with a written rationale attached.
@@ -134,6 +136,9 @@ equity-valuation-models/
 ├── data/
 │   ├── ledger/bhp_sources.csv    # every extracted fact with page citation and exact reference
 │   └── processed/VERSIONING.md   # period-by-period input comparison and staleness guide
+├── output/
+│   ├── BHP_real_note.md          # committed sample: the generated research note
+│   └── BHP_real_model.xlsx       # committed sample: the generated Excel model
 ├── templates/                    # bhp_template.json fill-in data-entry skeleton
 └── docs/
     ├── SCHEMA.md                 # ledger schema reference

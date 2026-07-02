@@ -172,6 +172,48 @@ class _NoteView:
         return self._comps.summary_table()
 
 
+class _WorkbookView:
+    """Adapter so excel_model.py can render the comps+DCF blend.
+
+    The workbook builder expects the src.sotp.SumOfParts surface:
+    value_per_share / enterprise_value / equity_value / summary_table /
+    discount_rate / revalue. Values are presented in AUD (m) to match the
+    ledger's reporting currency and the note's bridge table.
+    """
+
+    def __init__(self, comps, dcf, wacc):
+        self._comps, self._dcf, self.discount_rate = comps, dcf, wacc
+
+    def _blend(self, comps, dcf):
+        return (comps.value_per_share() + dcf.value_per_share()) / 2
+
+    def value_per_share(self):
+        return self._blend(self._comps, self._dcf)
+
+    def enterprise_value(self):
+        return self._comps.enterprise_value() / self._comps.usd_per_aud
+
+    def equity_value(self):
+        return self._comps.equity_value_usd() / self._comps.usd_per_aud
+
+    def summary_table(self):
+        return self._comps.summary_table()
+
+    def revalue(self, discount_rate, price_factor=1.0):
+        """Blended per-share under a WACC shift and a uniform EBITDA/price scaling.
+
+        Segment EBITDA scales linearly with the price factor (costs held fixed
+        would scale it *more*; linear is the conservative, documented shorthand).
+        The multiples leg is WACC-insensitive; only the DCF leg reprices."""
+        from dataclasses import replace
+        comps = replace(self._comps,
+                        segments=[replace(s, ebitda=s.ebitda * price_factor)
+                                  for s in self._comps.segments])
+        dcf = replace(self._dcf, ebitda=self._dcf.ebitda * price_factor,
+                      wacc=discount_rate)
+        return self._blend(comps, dcf)
+
+
 def _md_table(headers, rows):
     out = ["| " + " | ".join(headers) + " |", "|" + "|".join("---" for _ in headers) + "|"]
     for r in rows:
@@ -232,6 +274,14 @@ def main():
                recommendation=f"{rating}  (target A${blended:,.2f})",
                thesis=thesis, illustrative=False)
     print(f"\nnote -> {note_path}")
+
+    # ---- Excel model (committed as a sample output) ----
+    from src.excel_model import write_workbook
+    xlsx_path = os.path.join(_REPO, "output", "BHP_real_model.xlsx")
+    write_workbook(xlsx_path, led, _WorkbookView(comps, dcf, wacc),
+                   recommendation=f"{rating}  (target A${blended:,.2f})",
+                   illustrative=False)
+    print(f"excel -> {xlsx_path}")
 
 
 def _build_thesis(comps, dcf, price, comps_ps, dcf_ps, blended, upside, wacc):

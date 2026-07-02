@@ -63,14 +63,19 @@ def _banner(ws, row: int, text: str, span: int = 6) -> None:
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=span)
 
 
-def _cover(wb: Workbook, ledger: Ledger, sotp, recommendation: Optional[str]) -> None:
+def _cover(wb: Workbook, ledger: Ledger, sotp, recommendation: Optional[str],
+           illustrative: bool = True) -> None:
     ws = wb.active
     ws.title = "Cover"
     ws["A1"] = f"{ledger.company} ({ledger.ticker})"
     ws["A1"].font = _TITLE
     ws["A2"] = f"Equity valuation model  ·  prepared {date.today().isoformat()}"
-    _banner(ws, 4, "ILLUSTRATIVE -- NOT INVESTMENT ADVICE. Figures are placeholders; "
-                   "assumptions unverified. See the Assumptions sheet.")
+    if illustrative:
+        _banner(ws, 4, "ILLUSTRATIVE -- NOT INVESTMENT ADVICE. Figures are placeholders; "
+                       "assumptions unverified. See the Assumptions sheet.")
+    else:
+        _banner(ws, 4, "NOT INVESTMENT ADVICE. Personal research; every input's source and "
+                       "verification status is on the Assumptions sheet.")
     rows = [
         ("Rating", recommendation or "-"),
         ("Target / share (model ccy)", round(sotp.value_per_share(), 2)),
@@ -225,9 +230,10 @@ def _sensitivity(wb: Workbook, ledger: Ledger, sotp) -> None:
     _widths(ws, {"A": 24, "B": 12, "C": 12, "D": 12, "E": 12, "F": 12})
 
 
-def build_workbook(ledger: Ledger, sotp, *, recommendation: Optional[str] = None) -> Workbook:
+def build_workbook(ledger: Ledger, sotp, *, recommendation: Optional[str] = None,
+                   illustrative: bool = True) -> Workbook:
     wb = Workbook()
-    _cover(wb, ledger, sotp, recommendation)
+    _cover(wb, ledger, sotp, recommendation, illustrative=illustrative)
     _valuation(wb, ledger, sotp)
     _wacc(wb, ledger)
     _assumptions(wb, ledger)

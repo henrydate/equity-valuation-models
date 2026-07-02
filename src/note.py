@@ -43,13 +43,13 @@ def _source_label(entry) -> str:
 def render_note(ledger: Ledger, sotp=None, *, thesis: Optional[str] = None,
                 recommendation: Optional[str] = None, illustrative: bool = True) -> str:
     L: List[str] = []
-    L.append(f"# {ledger.company} ({ledger.ticker}) — Equity Research Note")
+    L.append(f"# {ledger.company} ({ledger.ticker}) · Equity Research Note")
     L.append("")
     L.append(f"*Prepared {date.today().isoformat()} · valuation basis "
              f"{ledger.reporting_currency}; per-share in {ledger.presentation_currency}*")
     L.append("")
     if illustrative:
-        L.append("> **⚠️ ILLUSTRATIVE — NOT INVESTMENT ADVICE.** Figures are placeholders to "
+        L.append("> **⚠️ ILLUSTRATIVE: NOT INVESTMENT ADVICE.** Figures are placeholders to "
                  "demonstrate the framework. Assumptions are unverified and do **not** reflect "
                  "a real valuation. See the model-integrity appendix for what remains unverified.")
         L.append("")
@@ -66,7 +66,7 @@ def render_note(ledger: Ledger, sotp=None, *, thesis: Optional[str] = None,
 
     L.append("## Recommendation")
     L.append("")
-    L.append(f"- **Rating:** {recommendation or '—'}")
+    L.append(f"- **Rating:** {recommendation or '-'}")
     same_ccy = ledger.reporting_currency == ledger.presentation_currency
     if target is not None:
         ccy = ledger.reporting_currency
@@ -81,19 +81,19 @@ def render_note(ledger: Ledger, sotp=None, *, thesis: Optional[str] = None,
             # currency is apples-to-oranges; show both and flag the missing FX step
             # rather than print a misleading percentage.
             L.append(f"- **Last price:** {current:,.2f} {ledger.presentation_currency}{px_asof}  ·  "
-                     f"target {target:,.2f} {ledger.reporting_currency} — "
+                     f"target {target:,.2f} {ledger.reporting_currency}; "
                      f"_FX conversion required before comparing (not applied)_")
     L.append("")
 
     # --- Thesis ---------------------------------------------------------
     L.append("## Investment thesis")
     L.append("")
-    L.append(thesis or "_Thesis to be written by the analyst — the framework supplies the "
+    L.append(thesis or "_Thesis to be written by the analyst: the framework supplies the "
                        "valuation and the audit trail; the view is yours._")
     L.append("")
 
     # --- Valuation ------------------------------------------------------
-    L.append("## Valuation — sum of the parts")
+    L.append("## Valuation: sum of the parts")
     L.append("")
     wacc = ledger.results.get("wacc", {}).get("value")
     coe = ledger.results.get("cost_of_equity", {}).get("value")
@@ -120,9 +120,9 @@ def render_note(ledger: Ledger, sotp=None, *, thesis: Optional[str] = None,
         L.append("")
         rows = []
         for e in facts:
-            verified = "✓" if e.verification == VerificationStatus.VERIFIED else "—"
+            verified = "✓" if e.verification == VerificationStatus.VERIFIED else "-"
             rows.append([e.label, _fmt(e.value), e.unit, e.as_of,
-                         f"{_source_label(e)} — {e.citation}".replace("|", "/"), verified])
+                         f"{_source_label(e)}: {e.citation}".replace("|", "/"), verified])
         L.append(_md_table(["Market input", "Value", "Unit", "As of", "Source & citation", "Verified"], rows))
         L.append("")
 
@@ -133,9 +133,9 @@ def render_note(ledger: Ledger, sotp=None, *, thesis: Optional[str] = None,
     if disc:
         rows = []
         for e in disc:
-            verified = "✓" if e.verification == VerificationStatus.VERIFIED else "—"
+            verified = "✓" if e.verification == VerificationStatus.VERIFIED else "-"
             method = f" ({e.method})" if e.method else ""
-            src = f"{_source_label(e)} — {e.citation}".replace("|", "/")
+            src = f"{_source_label(e)}: {e.citation}".replace("|", "/")
             rows.append([e.label + method, _fmt(e.value), e.unit, e.as_of, src,
                          verified, (e.rationale or "").replace("|", "/")])
         L.append(_md_table(["Input", "Value", "Unit", "As of", "Source & citation",

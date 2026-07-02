@@ -32,7 +32,7 @@ def make_sotp():
 def test_note_contains_core_sections():
     note = render_note(build_ledger(), make_sotp(), recommendation="HOLD", thesis="Test thesis.")
     for section in ["Equity Research Note", "Recommendation", "Investment thesis",
-                    "Valuation — sum of the parts", "Key assumptions & provenance",
+                    "Valuation: sum of the parts", "Key assumptions & provenance",
                     "Model integrity", "ILLUSTRATIVE"]:
         assert section in note
     assert "HOLD" in note

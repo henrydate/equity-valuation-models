@@ -19,7 +19,11 @@ env/
 ENV/
 
 # Generated artifacts -- regenerate via the demos or `python -m src.template_loader`
-output/
+# Exception: the real BHP note + Excel model are committed as sample outputs so
+# the result can be read without running anything.
+output/*
+!output/BHP_real_note.md
+!output/BHP_real_model.xlsx
 models/
 
 # Source documents: raw PDFs are large and copyrighted -- download locally into data/raw/
